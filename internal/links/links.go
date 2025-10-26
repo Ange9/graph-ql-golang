@@ -50,13 +50,17 @@ func GetAll() []Link {
 	defer rows.Close()
 	var links []Link
 	var username string
+	var id string
 	for rows.Next() {
 		var link Link
-		err := rows.Scan(&link.ID, &link.Title, &link.Address, &link.User.ID, &username)
+		err := rows.Scan(&link.ID, &link.Title, &link.Address, &id, &username) // changed
 		if err != nil {
 			log.Fatal(err)
 		}
-		link.User = &users.User{ID: link.User.ID, Username: username} // changed
+		link.User = &users.User{
+			ID:       id,
+			Username: username,
+		} // changed
 		links = append(links, link)
 	}
 	if err = rows.Err(); err != nil {
