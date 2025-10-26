@@ -1,9 +1,10 @@
 package links
 
 import (
+	"log"
+
 	database "github.com/glyphack/graphlq-golang/internal/pkg/db/mysql"
 	"github.com/glyphack/graphlq-golang/internal/users"
-	"log"
 )
 
 // #1
@@ -14,10 +15,11 @@ type Link struct {
 	User    *users.User
 }
 
-//#2
+// #2
+// #2
 func (link Link) Save() int64 {
 	//#3
-	stmt, err := database.Db.Prepare("INSERT INTO Links(Title,Address, UserID) VALUES(?,?, ?)")
+	stmt, err := database.Db.Prepare("INSERT INTO Links(Title,Address,UserId) VALUES(?,?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +38,7 @@ func (link Link) Save() int64 {
 }
 
 func GetAll() []Link {
-	stmt, err := database.Db.Prepare("select L.id, L.title, L.address, L.UserID, U.Username from Links L inner join Users U on L.UserID = U.ID")
+	stmt, err := database.Db.Prepare("select L.id, L.title, L.address, L.UserID, U.Username from Links L inner join Users U on L.UserID = U.ID") // changed
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,17 +50,13 @@ func GetAll() []Link {
 	defer rows.Close()
 	var links []Link
 	var username string
-	var id string
 	for rows.Next() {
 		var link Link
-		err := rows.Scan(&link.ID, &link.Title, &link.Address, &id, &username)
+		err := rows.Scan(&link.ID, &link.Title, &link.Address, &link.User.ID, &username)
 		if err != nil {
 			log.Fatal(err)
 		}
-		link.User = &users.User{
-			ID:       id,
-			Username: username,
-		}
+		link.User = &users.User{ID: link.User.ID, Username: username} // changed
 		links = append(links, link)
 	}
 	if err = rows.Err(); err != nil {
